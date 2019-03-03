@@ -67,14 +67,17 @@ def get_cam_can_parser(CP, canbus):
     ("BIT_2",            "CAM_LKAS", 0),
     ("CHKSUM",           "CAM_LKAS", 0),
 
-    ("S1",     "CAM_LANEINFO", 0),
+    ("BIT2",       "CAM_LANEINFO", 1),
+    ("NO_ERR_BIT", "CAM_LANEINFO", 1),
+    ("S1",         "CAM_LANEINFO", 1),
+    ("S1_NOT",     "CAM_LANEINFO", 0),
   ]
   
   checks = [
     # sig_address, frequency
     ("CAM_LKAS",      30),
     ("CAM_LANETRACK", 30),
-    ("CAM_LANEINFO", 500),
+    ("CAM_LANEINFO", 250),
   ]
 
   return CANParser(DBC[CP.carFingerprint]['pt'], signals, checks, canbus.cam)
@@ -172,6 +175,8 @@ class CarState(object):
     self.seatbelt =  pt_cp.vl["SEATBELT"]['DRIVER_SEATBELT']
 
     #if self.CAM_LT.ctr != cam_cp.vl["CAM_LANETRACK"]['CTR'] and cam_cp.vl["CAM_LANETRACK"]['CTR'] == cam_cp.vl["CAM_LKAS"]['CTR']:
+
+    self.cam_laneinfo = cam_cp.vl["CAM_LANEINFO"]
 
     if self.CAM_LKAS.ctr != cam_cp.vl["CAM_LKAS"]['CTR']:
       #self.CAM_LT.ctr        = cam_cp.vl["CAM_LANETRACK"]['CTR']

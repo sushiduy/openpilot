@@ -51,19 +51,19 @@ def create_lkas_msg(packer, bus, car_fingerprint, CAM_LKAS):
 
   return packer.make_can_msg("CAM_LKAS", bus, values)
 
-def create_cam_lane_info(packer, bus, car_fingerprint, lnv):
+def create_cam_lane_info(packer, bus, car_fingerprint, lnv, cam_laneinfo):
   if car_fingerprint == CAR.CX5:
     values = {
         "LINE_VISIBLE"          : 1 if lnv == 0 else 0,
         "LINE_NOT_VISIBLE"      : lnv,
         "BIT1"                  : 1,
         "LANE_LINES"            : 2 if lnv == 0 else 1,
-        "BIT2"                  : 1,
-        "NO_ERR_BIT"            : 1,
+        "BIT2"                  : cam_laneinfo["BIT2"],
+        "NO_ERR_BIT"            : cam_laneinfo["NO_ERR_BIT"],
         "ERR_BIT"               : 0,
         "HANDS_WARN_3_BITS"     : 0,
-        "S1"                    : 1,
-        "S1_NOT"                : 0,
+        "S1"                    : cam_laneinfo["S1"],
+        "S1_NOT"                : cam_laneinfo["S1_NOT"],
         "HANDS_ON_STEER_WARN"   : 0,
         "HANDS_ON_STEER_WARN_2" : 0,
         "BIT3"                  : 1
