@@ -9,15 +9,15 @@ def get_powertrain_can_parser(CP, canbus):
   # this function generates lists for signal, messages and initial values
   signals = [
     # sig_name, sig_address, default
-    ("LEFT_BLINK", "BLINK_INFO", 0), 
+    ("LEFT_BLINK", "BLINK_INFO", 0),
     ("RIGHT_BLINK", "BLINK_INFO", 0),
     ("STEER_ANGLE", "STEER", 0),
     ("STEER_ANGLE_RATE", "STEER_RATE", 0),
     ("STEER_TORQUE_SENSOR", "STEER_TORQUE", 0),
-    ("FL", "WHEEL_SPEEDS", 0), 
+    ("FL", "WHEEL_SPEEDS", 0),
     ("FR", "WHEEL_SPEEDS", 0),
-    ("RL", "WHEEL_SPEEDS", 0), 
-    ("RR", "WHEEL_SPEEDS", 0), 
+    ("RL", "WHEEL_SPEEDS", 0),
+    ("RR", "WHEEL_SPEEDS", 0),
     ("CRZ_ACTIVE", "CRZ_CTRL", 0),
     ("STANDSTILL","PEDALS", 0),
     ("BRAKE_ON","PEDALS", 0),
@@ -26,16 +26,16 @@ def get_powertrain_can_parser(CP, canbus):
     ("FL", "DOORS", 0),
     ("GAS_PEDAL_PRESSED", "CRZ_EVENTS", 0),
   ]
-  
+
   checks = [
     # sig_address, frequency
     ("BLINK_INFO", 100),
-    ("STEER", 20),
-    ("STEER_RATE", 20),
-    ("STEER_TORQUE", 20),
-    ("WHEEL_SPEEDS", 20),
+    ("STEER", 15),
+    ("STEER_RATE", 12),
+    ("STEER_TORQUE", 12),
+    ("WHEEL_SPEEDS", 10),
     ("CRZ_CTRL", 20),
-    ("CRZ_EVENTS", 50),
+    ("CRZ_EVENTS", 20),
     ("PEDALS", 20),
     ("SEATBELT", 100),
     ("DOORS", 100),
@@ -48,15 +48,15 @@ def get_cam_can_parser(CP, canbus):
   # this function generates lists for signal, messages and initial values
   signals = [
     # sig_name, sig_address, default
-    ("LINE1",      "CAM_LANETRACK", 0),
-    ("CTR",        "CAM_LANETRACK", -1),
-    ("LINE2",      "CAM_LANETRACK", 0),
-    ("LANE_CURVE", "CAM_LANETRACK", 0),
-    ("SIG1",       "CAM_LANETRACK", 0),
-    ("SIG2",       "CAM_LANETRACK", 0),
-    ("ZERO",       "CAM_LANETRACK", 0),
-    ("SIG3",       "CAM_LANETRACK", 0),
-    ("CHKSUM",     "CAM_LANETRACK", 0),
+    #("LINE1",      "CAM_LANETRACK", 0),
+    #("CTR",        "CAM_LANETRACK", -1),
+    #("LINE2",      "CAM_LANETRACK", 0),
+    #("LANE_CURVE", "CAM_LANETRACK", 0),
+    #("SIG1",       "CAM_LANETRACK", 0),
+    #("SIG2",       "CAM_LANETRACK", 0),
+    #("ZERO",       "CAM_LANETRACK", 0),
+    #("SIG3",       "CAM_LANETRACK", 0),
+    #("CHKSUM",     "CAM_LANETRACK", 0),
 
     ("LKAS_REQUEST",     "CAM_LKAS", 0),
     ("CTR",              "CAM_LKAS", -1),
@@ -72,16 +72,16 @@ def get_cam_can_parser(CP, canbus):
     ("S1",         "CAM_LANEINFO", 1),
     ("S1_NOT",     "CAM_LANEINFO", 0),
   ]
-  
+
   checks = [
     # sig_address, frequency
     ("CAM_LKAS",      30),
-    ("CAM_LANETRACK", 30),
+    #("CAM_LANETRACK", 30),
     ("CAM_LANEINFO", 250),
   ]
 
   return CANParser(DBC[CP.carFingerprint]['pt'], signals, checks, canbus.cam)
-  
+
 class CAM_LaneTrack(object):
   def __init__(self, ln1, ctr, ln2, lc, s1, s2, z, s3, ck):
     self.line1 = ln1
@@ -109,9 +109,9 @@ class CarState(object):
   def __init__(self, CP, canbus):
     # initialize can parser
     self.CP = CP
-    self.CAM_LT = CAM_LaneTrack(0, -1, 0, 0, 0, 0, 0, 0, 0)
+    #self.CAM_LT = CAM_LaneTrack(0, -1, 0, 0, 0, 0, 0, 0, 0)
     self.CAM_LKAS = CAM_LaneKAS(0, -1, 0, 0, 0, 0, 0, 0)
-    
+
     self.car_fingerprint = CP.carFingerprint
     self.blinker_on = False
     self.prev_blinker_on = False
@@ -137,7 +137,7 @@ class CarState(object):
 
     self.can_valid = pt_cp.can_valid
     self.can_valid = True
-    
+
     self.v_wheel_fl = pt_cp.vl["WHEEL_SPEEDS"]['FL'] * CV.KPH_TO_MS
     self.v_wheel_fr = pt_cp.vl["WHEEL_SPEEDS"]['FR'] * CV.KPH_TO_MS
     self.v_wheel_rl = pt_cp.vl["WHEEL_SPEEDS"]['RL'] * CV.KPH_TO_MS
@@ -159,11 +159,11 @@ class CarState(object):
 
     self.acc_active = pt_cp.vl["CRZ_CTRL"]['CRZ_ACTIVE']
     self.main_on = pt_cp.vl["CRZ_CTRL"]['CRZ_ACTIVE']
-      
+
     self.steer_torque_driver = pt_cp.vl["STEER_TORQUE"]['STEER_TORQUE_SENSOR']
     self.steer_override = abs(self.steer_torque_driver) > 150 #fixme
 
-    self.angle_steers = pt_cp.vl["STEER"]['STEER_ANGLE'] 
+    self.angle_steers = pt_cp.vl["STEER"]['STEER_ANGLE'
     self.angle_steers_rate = pt_cp.vl["STEER_RATE"]['STEER_ANGLE_RATE']
 
     #self.standstill = pt_cp.vl["PEDALS"]['STANDSTILL'] == 1
