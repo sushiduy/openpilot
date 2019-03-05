@@ -13,6 +13,8 @@ def get_powertrain_can_parser(CP, canbus):
     ("RIGHT_BLINK", "BLINK_INFO", 0),
     ("STEER_ANGLE", "STEER", 0),
     ("STEER_ANGLE_RATE", "STEER_RATE", 0),
+    ("LKAS_BLOCK", "STEER_RATE", 0),
+    ("LKAS_TRACK_STATE", "STEER_RATE", 0),
     ("STEER_TORQUE_SENSOR", "STEER_TORQUE", 0),
     ("FL", "WHEEL_SPEEDS", 0),
     ("FR", "WHEEL_SPEEDS", 0),
@@ -29,17 +31,17 @@ def get_powertrain_can_parser(CP, canbus):
 
   checks = [
     # sig_address, frequency
-    ("BLINK_INFO", 100),
-    ("STEER", 15),
-    ("STEER_RATE", 12),
-    ("STEER_TORQUE", 12),
-    ("WHEEL_SPEEDS", 10),
-    ("CRZ_CTRL", 20),
-    ("CRZ_EVENTS", 20),
-    ("PEDALS", 20),
-    ("SEATBELT", 100),
-    ("DOORS", 100),
-    ("GEAR", 50),
+    ("BLINK_INFO", 10),
+    ("STEER", 67),
+    ("STEER_RATE", 83),
+    ("STEER_TORQUE", 83),
+    ("WHEEL_SPEEDS", 100),
+    ("CRZ_CTRL", 50),
+    ("CRZ_EVENTS", 50),
+    ("PEDALS", 50),
+    ("SEATBELT", 10),
+    ("DOORS", 10),
+    ("GEAR", 20),
   ]
 
   return CANParser(DBC[CP.carFingerprint]['pt'], signals, checks, canbus.powertrain)
@@ -75,9 +77,9 @@ def get_cam_can_parser(CP, canbus):
 
   checks = [
     # sig_address, frequency
-    ("CAM_LKAS",      30),
+    ("CAM_LKAS",      16),
     #("CAM_LANETRACK", 30),
-    ("CAM_LANEINFO", 250),
+    ("CAM_LANEINFO", 4),
   ]
 
   return CANParser(DBC[CP.carFingerprint]['pt'], signals, checks, canbus.cam)
@@ -105,12 +107,19 @@ class CAM_LaneKAS(object):
     self.bit2 = b2
     self.chksum = ck
 
+class STEER_LKAS(object):
+  def __init__(self):
+    self.block = 1
+    self.track = 1
+
 class CarState(object):
   def __init__(self, CP, canbus):
     # initialize can parser
     self.CP = CP
     #self.CAM_LT = CAM_LaneTrack(0, -1, 0, 0, 0, 0, 0, 0, 0)
     self.CAM_LKAS = CAM_LaneKAS(0, -1, 0, 0, 0, 0, 0, 0)
+
+    self.steer_lkas = STEER_LKAS()
 
     self.car_fingerprint = CP.carFingerprint
     self.blinker_on = False
@@ -173,6 +182,9 @@ class CarState(object):
 
     self.door_all_closed = not pt_cp.vl["DOORS"]['FL']
     self.seatbelt =  pt_cp.vl["SEATBELT"]['DRIVER_SEATBELT']
+
+    self.steer_lkas.block = pt_cp.vl["STEER_RATE"]['LKAS_BLOCK']
+    self.steer_lkas.track = pt_cp.vl["STEER_RATE"]['LKAS_TRACK_STATE']
 
     #if self.CAM_LT.ctr != cam_cp.vl["CAM_LANETRACK"]['CTR'] and cam_cp.vl["CAM_LANETRACK"]['CTR'] == cam_cp.vl["CAM_LKAS"]['CTR']:
 

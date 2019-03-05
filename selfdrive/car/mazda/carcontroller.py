@@ -97,7 +97,8 @@ class CarController(object):
 
           # send lane info msgs at 1/8 rate of steer msgs
           if (ctr % 8) == 0:
-            can_sends.append(mazdacan.create_cam_lane_info(self.packer_pt, canbus.powertrain, CS.CP.carFingerprint, line_not_visible, CS.cam_laneinfo))
+            can_sends.append(mazdacan.create_cam_lane_info(self.packer_pt, canbus.powertrain, CS.CP.carFingerprint,
+                                                           line_not_visible, CS.cam_laneinfo, CS.steer_lkas))
 
           #can_sends.append(mazdacan.create_lkas_msg(self.packer_pt, canbus.powertrain, CS.CP.carFingerprint, CS.CAM_LKAS))
 
