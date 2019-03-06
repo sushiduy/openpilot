@@ -10,7 +10,7 @@ from selfdrive.can.packer import CANPacker
 
 class CarControllerParams():
   def __init__(self, car_fingerprint):
-    self.STEER_MAX = 2000              # max_steer 2048
+    self.STEER_MAX = 500              # max_steer 2048
     self.STEER_STEP = 1    # 6        # how often we update the steer cmd
     self.STEER_DELTA_UP = 10           # torque increase per refresh
     self.STEER_DELTA_DOWN = 20         # torque decrease per refresh
@@ -95,8 +95,8 @@ class CarController(object):
           can_sends.append(mazdacan.create_steering_control(self.packer_pt, canbus.powertrain,
                                                             CS.CP.carFingerprint, ctr, apply_steer, line_not_visible, 1, 1, e1, e2))
 
-          # send lane info msgs at 1/8 rate of steer msgs
-          if (ctr % 8) == 0:
+          # send lane info msgs at 1/16 rate of steer msgs
+          if (ctr == 0):
             can_sends.append(mazdacan.create_cam_lane_info(self.packer_pt, canbus.powertrain, CS.CP.carFingerprint,
                                                            line_not_visible, CS.cam_laneinfo, CS.steer_lkas))
 
