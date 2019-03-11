@@ -43,6 +43,9 @@ class CarController(object):
     self.last_lkas_block = 0
     self.last_lkas_track = 0
     self.handsoff_ctr = 0
+    self.ldw = 0
+    self.ldwr = 0
+    self.ldwl = 0
 
   def update(self, sendcan, enabled, CS, frame, actuators):
     """ Controls thread """
@@ -96,42 +99,47 @@ class CarController(object):
           e1 = CS.CAM_LKAS.err1
           e2 = CS.CAM_LKAS.err2
 
-          if CS.steer_lkas.handsoff == 1:
+          if CS.steer_lkas.handsoff == 1 and self.ldw == 0:
             self.handsoff_ctr += 1
-            if self.handsoff_ctr >= 350:
-              self.ldw_ctr = 20
+            if self.handsoff_ctr > 200:
+              self.ldw_ctr = 50
               self.handsoff_ctr = 0
-          else:
-            self.handsoff_ctr = 0
-            self.ldw_ctr = 0
+              self.ldw = 1
+              if apply_steer > 0:
+                self.ldwr = 1
+                self.ldwl = 0
+              else:
+                self.ldwr = 0
+                self.ldwl = 1
+          #else:
+          #  self.handsoff_ctr = 0
+
+          if self.ldw == 0 and CS.steer_lkas.block == 1 and CS.v_ego_raw > 54 and apply_steer != 0:
+            self.ldw = 1
+            self.ldw_ctr = 50
+            if apply_steer > 0:
+              self.ldwr = 1
+              self.ldwl = 0
+            else:
+              self.ldwr = 0
+              self.ldwl = 1
 
           if self.ldw_ctr > 0:
             self.ldw_ctr -= 1
-            ldw = 1
-          elif CS.steer_lkas.block == 1 and CS.v_ego_raw > 54 and apply_steer != 0:
-            ldw = 1
-          else:
-            ldw = 0
-
-          if ldw == 1:
-            if apply_steer > 0:
-              ldwl = 0
-              ldwr = 1
-            else:
-              ldwl = 0
-              ldwr = 1
-          else:
-            ldwl = 0
-            ldwr = 0
-
+            if self.ldw_ctr == 0:
+              self.ldw = 0
+              self.ldwl = 0
+              self.ldwr = 0
 
           can_sends.append(mazdacan.create_steering_control(self.packer_pt, canbus.powertrain,
-                                                            CS.CP.carFingerprint, ctr, apply_steer, line_not_visible, 1, 1, e1, e2, ldw))
+                                                            CS.CP.carFingerprint, ctr, apply_steer, line_not_visible,
+                                                            1, 1, e1, e2, self.ldw))
 
-          # send lane info msgs at 1/16 rate of steer msgs
-          if (ctr == 0):
+          # send lane info msgs at 1/4 rate of steer msgs
+          if (ctr % 4 == 0):
             can_sends.append(mazdacan.create_cam_lane_info(self.packer_pt, canbus.powertrain, CS.CP.carFingerprint,
-                                                           line_not_visible, CS.cam_laneinfo, CS.steer_lkas, ldwr, ldwl))
+                                                           line_not_visible, CS.cam_laneinfo, CS.steer_lkas,
+                                                           self.ldwr, self.ldwl))
 
           #can_sends.append(mazdacan.create_lkas_msg(self.packer_pt, canbus.powertrain, CS.CP.carFingerprint, CS.CAM_LKAS))
 

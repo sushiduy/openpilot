@@ -53,7 +53,11 @@ def create_lkas_msg(packer, bus, car_fingerprint, CAM_LKAS):
   return packer.make_can_msg("CAM_LKAS", bus, values)
 
 def create_cam_lane_info(packer, bus, car_fingerprint, lnv, cam_laneinfo, steer_lkas, ldwr, ldwl):
-  if steer_lkas.block == 1:
+  if ldwr == 1:
+    lin = 4
+  elif ldwl == 1:
+    lin = 3
+  elif steer_lkas.block == 1:
     lin = 1
   elif steer_lkas.track == 1:
     lin = 3
