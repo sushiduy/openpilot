@@ -26,10 +26,10 @@ static int mazda_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_fwd) {
 
   // forward CAN 0 > 1
   if (bus_num == 0) {
-    return 1; //  CAN Bus0 ==> CAN Bus1
+    return 2; //  CAN Bus0 ==> CAN Bus1
   }
   // forward CAN 1 > 0, except CAM_LKAS, and CAM_LANEINFO
-  else if (bus_num == 1) {
+  else if (bus_num == 2) {
     if (addr == 0x243 || addr == 0x440) {
       return -1;
     }
