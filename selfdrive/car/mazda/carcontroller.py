@@ -10,7 +10,7 @@ from selfdrive.can.packer import CANPacker
 
 class CarControllerParams():
   def __init__(self, car_fingerprint):
-    self.STEER_MAX = 1000              # max_steer 2048
+    self.STEER_MAX = 298              # max_steer 2048
     self.STEER_STEP = 1    # 6        # how often we update the steer cmd
     self.STEER_DELTA_UP = 10           # torque increase per refresh
     self.STEER_DELTA_DOWN = 20         # torque decrease per refresh
@@ -102,7 +102,7 @@ class CarController(object):
           if CS.steer_lkas.handsoff == 1 and self.ldw == 0:
             self.handsoff_ctr += 1
             if self.handsoff_ctr > 200:
-              self.ldw_ctr = 50
+              self.ldw_ctr = 100
               self.handsoff_ctr = 0
               self.ldw = 1
               if apply_steer > 0:
@@ -116,7 +116,7 @@ class CarController(object):
 
           if self.ldw == 0 and CS.steer_lkas.block == 1 and CS.v_ego_raw > 54 and apply_steer != 0:
             self.ldw = 1
-            self.ldw_ctr = 50
+            self.ldw_ctr = 100
             if apply_steer > 0:
               self.ldwr = 1
               self.ldwl = 0
@@ -124,16 +124,20 @@ class CarController(object):
               self.ldwr = 0
               self.ldwl = 1
 
+          ldw = 0
           if self.ldw_ctr > 0:
             self.ldw_ctr -= 1
             if self.ldw_ctr == 0:
               self.ldw = 0
               self.ldwl = 0
               self.ldwr = 0
+            elif self.ldw_ctr < 75 and self.ldw_ctr > 25:
+              ldw = 1
+
 
           can_sends.append(mazdacan.create_steering_control(self.packer_pt, canbus.powertrain,
                                                             CS.CP.carFingerprint, ctr, apply_steer, line_not_visible,
-                                                            1, 1, e1, e2, self.ldw))
+                                                            1, 1, e1, e2, ldw))
 
           # send lane info msgs at 1/4 rate of steer msgs
           if (ctr % 4 == 0):
