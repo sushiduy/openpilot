@@ -59,8 +59,6 @@ def create_cam_lane_info(packer, bus, car_fingerprint, lnv, cam_laneinfo, steer_
     lin = 3
   elif steer_lkas.block == 1:
     lin = 1
-  elif steer_lkas.track == 1:
-    lin = 3
   elif lnv == 0:
     lin = 2
   else:
