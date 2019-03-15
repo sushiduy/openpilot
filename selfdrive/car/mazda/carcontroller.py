@@ -89,6 +89,17 @@ class CarController(object):
         ctr = (frame / P.STEER_STEP) % 16
         #ctr = CS.CAM_LKAS.ctr #(frame / P.STEER_STEP) % 16
 
+        #  assuming controlsd runs at 83 hz
+        #  2000ms => 166.6
+        #  1000ms => 83.3
+        #  500ms  => 41.65
+
+        tsec = 167
+        osec = 83
+        hsec = 42
+        qsec = 21
+        q3sec = 62
+
         if ctr != -1 and self.last_cam_ctr != ctr:
           self.last_cam_ctr = ctr
           #line_not_visible = CS.CAM_LKAS.lnv
@@ -98,24 +109,13 @@ class CarController(object):
             self.lkas_track_ctr = 0
 
 
-          if CS.v_ego_raw > 4 and self.lkas_track_ctr < 8:
+          if CS.v_ego_raw > 4 and self.lkas_track_ctr < osec:
             line_not_visible = 0
           else:
             line_not_visible = 1
 
           e1 = CS.CAM_LKAS.err1
           e2 = CS.CAM_LKAS.err2
-
-          #  assuming controlsd runs at 83 hz
-          #  2000ms => 166.6
-          #  1000ms => 83.3
-          #  500ms  => 41.65
-
-          tsec = 167
-          osec = 83
-          hsec = 42
-          qsec = 21
-          q3sec = 62
 
           if CS.steer_lkas.handsoff == 1 and self.ldw == 0:
             self.handsoff_ctr += 1
@@ -143,19 +143,24 @@ class CarController(object):
               self.ldwl = 1
 
           ldw = 0
-          if self.ldw_ctr > 0:
+          if self.ldw_ctr < 0:
+            self.ldw_ctr += 1
+            if self.ldw_ctr == 0:
+              self.ldw = 0        # enable triggering ldw
+          elif self.ldw_ctr > 0:
             self.ldw_ctr -= 1
             if self.ldw_ctr == 0:
-              self.ldw = 0
+              self.ldw = -1        # disable ldw
               self.ldwl = 0
               self.ldwr = 0
+              self.ldw_ctr = -tsec # no ldw for two seconds
             elif self.ldw_ctr < q3sec-10 and self.ldw_ctr > qsec-10:
               ldw = 1
 
 
           can_sends.append(mazdacan.create_steering_control(self.packer_pt, canbus.powertrain,
-                                                            CS.CP.carFingerprint, ctr, apply_steer/3, 
-line_not_visible,
+                                                            CS.CP.carFingerprint, ctr, apply_steer/3,
+                                                            line_not_visible,
                                                             1, 1, e1, e2, ldw))
 
           # send lane info msgs at 1/8 rate of steer msgs
