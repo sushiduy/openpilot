@@ -73,7 +73,7 @@ def create_cam_lane_info(packer, bus, car_fingerprint, lnv, cam_laneinfo, steer_
         "BIT2"                  : cam_laneinfo["BIT2"],
         "NO_ERR_BIT"            : cam_laneinfo["NO_ERR_BIT"],
         "ERR_BIT"               : 0,
-        "HANDS_WARN_3_BITS"     : (ldwr+ldwl) * 7,
+        "HANDS_WARN_3_BITS"     : 0,
         "S1"                    : cam_laneinfo["S1"],
         "S1_NOT"                : cam_laneinfo["S1_NOT"],
         "HANDS_ON_STEER_WARN"   : ldwr+ldwl,
