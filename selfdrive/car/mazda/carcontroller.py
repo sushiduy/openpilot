@@ -10,7 +10,7 @@ from selfdrive.can.packer import CANPacker
 
 class CarControllerParams():
   def __init__(self, car_fingerprint):
-    self.STEER_MAX = 2047              # max_steer 2048
+    self.STEER_MAX = 1000              # max_steer 2048
     self.STEER_STEP = 1    # 6        # how often we update the steer cmd
     self.STEER_DELTA_UP = 10           # torque increase per refresh
     self.STEER_DELTA_DOWN = 20         # torque decrease per refresh
@@ -117,24 +117,22 @@ class CarController(object):
           e1 = CS.CAM_LKAS.err1
           e2 = CS.CAM_LKAS.err2
 
-          if CS.steer_lkas.handsoff == 1 and self.ldw == 0:
-            self.handsoff_ctr += 1
-            if self.handsoff_ctr > 0:
-              self.ldw_ctr = osec
-              self.handsoff_ctr = 0
+          if self.ldw_ctr < 0:
+            self.ldw_ctr += 1
+          elif self.ldw_ctr > 0:
+            self.ldw_ctr -= 1
+            if self.ldw_ctr == 0:
+              self.ldw = 0
+              self.ldwl = 0
+              self.ldwr = 0
+              self.ldw_ctr = -tsec # no ldw for two seconds
+            elif self.ldw_ctr < q3sec-10 and self.ldw_ctr > qsec-10:
               self.ldw = 1
-              if apply_steer > 0:
-                self.ldwr = 1
-                self.ldwl = 0
-              else:
-                self.ldwr = 0
-                self.ldwl = 1
-          #else:
-          #  self.handsoff_ctr = 0
-
-          if self.ldw == 0 and CS.steer_lkas.block == 1 and CS.v_ego_raw > 54 and apply_steer != 0:
-            self.ldw = 1
+            else:
+              self.ldw = 0
+          elif CS.steer_lkas.handsoff == 1:
             self.ldw_ctr = osec
+            self.ldw = 0
             if apply_steer > 0:
               self.ldwr = 1
               self.ldwl = 0
@@ -142,26 +140,11 @@ class CarController(object):
               self.ldwr = 0
               self.ldwl = 1
 
-          ldw = 0
-          if self.ldw_ctr < 0:
-            self.ldw_ctr += 1
-            if self.ldw_ctr == 0:
-              self.ldw = 0        # enable triggering ldw
-          elif self.ldw_ctr > 0:
-            self.ldw_ctr -= 1
-            if self.ldw_ctr == 0:
-              self.ldw = -1        # disable ldw
-              self.ldwl = 0
-              self.ldwr = 0
-              self.ldw_ctr = -tsec # no ldw for two seconds
-            elif self.ldw_ctr < q3sec-10 and self.ldw_ctr > qsec-10:
-              ldw = 1
-
 
           can_sends.append(mazdacan.create_steering_control(self.packer_pt, canbus.powertrain,
-                                                            CS.CP.carFingerprint, ctr, apply_steer/3,
+                                                            CS.CP.carFingerprint, ctr, apply_steer,
                                                             line_not_visible,
-                                                            1, 1, e1, e2, ldw))
+                                                            1, 1, e1, e2, self.ldw))
 
           # send lane info msgs at 1/8 rate of steer msgs
           if (ctr % 8 == 0):
