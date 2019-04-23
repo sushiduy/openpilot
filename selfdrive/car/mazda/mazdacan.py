@@ -54,12 +54,12 @@ def create_lkas_msg(packer, bus, car_fingerprint, CAM_LKAS):
 
 def create_cam_lane_info(packer, bus, car_fingerprint, lnv, cam_laneinfo, steer_lkas, ldwr, ldwl, lines):
 
-  if steer_lkas.block == 1:
-    lin = 0
-  elif lines == 0:
-    lin = 0
-  else:
-    lin = 2
+  #if steer_lkas.block == 1:
+  #  lin = 0
+  #if lines == 0:
+  # lin = 0
+  #else:
+  lin = lines
 
   if car_fingerprint == CAR.CX5:
     values = {
