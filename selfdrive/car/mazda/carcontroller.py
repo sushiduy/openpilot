@@ -125,7 +125,7 @@ class CarController(object):
               self.ldw = 0
               self.ldwl = 0
               self.ldwr = 0
-              self.ldw_ctr = -3 * tsec / 2 # no ldw for 3 seconds
+              self.ldw_ctr = -2 * tsec # no ldw for 2 seconds
             elif self.ldw_ctr < q3sec-10 and self.ldw_ctr > qsec-10:
               self.ldw = 1
             else:
@@ -143,6 +143,8 @@ class CarController(object):
           if self.ldwl != 0 or self.ldwr != 0:
             apply_steer = 0
             lines = 0
+          elif CS.v_ego_raw < 45:
+            lines = 1
           else:
             lines = 2
 
@@ -151,8 +153,8 @@ class CarController(object):
                                                             line_not_visible,
                                                             1, 1, e1, e2, 0)) #self.ldw))
           # send lane info msgs at 1/8 rate of steer msgs
-          if (ctr % 2 == 0):
-            can_sends.append(mazdacan.create_cam_lane_info(self.packer_pt, canbus.powertrain, CS.CP.carFingerprint,
+          #if (ctr % 2 == 0):
+          can_sends.append(mazdacan.create_cam_lane_info(self.packer_pt, canbus.powertrain, CS.CP.carFingerprint,
                                                            line_not_visible, CS.cam_laneinfo, CS.steer_lkas,
                                                            self.ldwr, self.ldwl, lines))
 
