@@ -196,10 +196,15 @@ class CarInterface(CarInterfaceBase):
 
     if self.CS.low_speed_lockout:
       events.append(create_event('speedTooLow', [ET.NO_ENTRY]))
+      self.CS.acc_active = False
+
+    if self.CS.steer_lkas.handsoff:
+      events.append(create_event('steerTempUnavailable', [ET.NO_ENTRY, ET.WARNING]))
 
     # disable on gas pedal rising edge
     if (ret.gasPressed and not self.gas_pressed_prev):
       events.append(create_event('pedalPressed', [ET.NO_ENTRY, ET.USER_DISABLE]))
+      self.CS.acc_active = False
 
     # handle button presses
     for b in ret.buttonEvents:

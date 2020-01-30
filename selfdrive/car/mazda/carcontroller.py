@@ -7,7 +7,7 @@ from selfdrive.car import apply_std_steer_torque_limits
 class CarControllerParams():
   def __init__(self, car_fingerprint):
     self.STEER_MAX = 700                 # max_steer 2048
-    self.STEER_STEP = 1                  # how often we update the steer cmd
+    self.STEER_STEP = 2                  # how often we update the steer cmd
     self.STEER_DELTA_UP = 10             # torque increase per refresh
     self.STEER_DELTA_DOWN = 20           # torque decrease per refresh
     self.STEER_DRIVER_ALLOWANCE = 15     # allowed driver torque before start limiting
