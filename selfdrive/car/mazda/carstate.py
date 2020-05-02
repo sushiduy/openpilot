@@ -91,20 +91,24 @@ class CarState(CarStateBase):
     if not ret.cruiseState.available:
       self.acc_active = False
 
-    if self.acc_active != self.acc_active_last:
-      self.acc_active_last = self.acc_active
-
     ret.cruiseState.enabled = self.acc_active
 
     if ret.cruiseState.enabled:
       ret.cruiseState.speed = self.cruise_speed
-      if self.lkas_speed_lock or handsoff:
+      if (self.lkas_speed_lock and self.acc_active_last) or handsoff:
         ret.steerWarning = True
+
+      if self.low_speed_lockout and not self.acc_active_last:
+          self.acc_active = False
     else:
       ret.cruiseState.speed = 0
 
 
-    self.low_speed_lockout_last = self.low_speed_lockout
+    if self.low_speed_lockout_last != self.low_speed_lockout:
+      self.low_speed_lockout_last = self.low_speed_lockout
+    if self.acc_active != self.acc_active_last:
+      self.acc_active_last = self.acc_active
+
 
     self.cam_lkas = cp_cam.vl["CAM_LKAS"]
     self.steerError = cp_cam.vl["CAM_LKAS"]['ERR_BIT_1'] == 1
