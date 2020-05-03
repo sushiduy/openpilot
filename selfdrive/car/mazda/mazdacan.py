@@ -1,6 +1,6 @@
 from selfdrive.car.mazda.values import CAR
 
-def create_steering_control(packer, car_fingerprint, frame, apply_steer, lkas):
+def create_steering_control(packer, car_fingerprint, frame, apply_steer, lkas, angle):
 
   tmp = apply_steer + 2048
 
@@ -13,7 +13,7 @@ def create_steering_control(packer, car_fingerprint, frame, apply_steer, lkas):
   lnv = 0
   er2= int(lkas["ERR_BIT_2"])
 
-  steering_angle = int(lkas["STEERING_ANGLE"])
+  steering_angle = int(angle) # int(angle / 0.022) #int(lkas["STEERING_ANGLE"])
   b2 = int(lkas["ANGLE_ENABLED"])
 
   tmp = steering_angle + 2048
