@@ -8,6 +8,7 @@ class CarController():
     self.apply_steer_last = 0
     self.packer = CANPacker(dbc_name)
     self.steer_rate_limited = False
+    idx = 0
 
   def update(self, enabled, CS, frame, actuators):
     """ Controls thread """
@@ -16,19 +17,22 @@ class CarController():
 
     ### STEER ###
 
-    if enabled:
-      # calculate steer and also set limits due to driver torque
-      new_steer = int(round(actuators.steer * SteerLimitParams.STEER_MAX))
-      apply_steer = apply_std_steer_torque_limits(new_steer, self.apply_steer_last,
+    x = int(CS.cam_lkas["CTR"])
+    if x != self.idx:
+      self.idx = x
+
+      if enabled:
+        # calculate steer and also set limits due to driver torque
+        new_steer = int(round(actuators.steer * SteerLimitParams.STEER_MAX))
+        apply_steer = apply_std_steer_torque_limits(new_steer, self.apply_steer_last,
                                                   CS.out.steeringTorque, SteerLimitParams)
-      self.steer_rate_limited = new_steer != apply_steer
-    else:
-      apply_steer = 0
-      self.steer_rate_limited = False
+        self.steer_rate_limited = new_steer != apply_steer
+      else:
+        apply_steer = 0
+        self.steer_rate_limited = False
 
-    self.apply_steer_last = apply_steer
+      self.apply_steer_last = apply_steer
   
-
-    can_sends.append(mazdacan.create_steering_control(self.packer, CS.CP.carFingerprint,
-                                                      frame, apply_steer, CS.cam_lkas, CS.out.steeringAngle))
+      can_sends.append(mazdacan.create_steering_control(self.packer, CS.CP.carFingerprint,
+                                                      self.idx, apply_steer, CS.cam_lkas, CS.out.steeringAngle))
     return can_sends

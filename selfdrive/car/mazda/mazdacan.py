@@ -1,6 +1,6 @@
 from selfdrive.car.mazda.values import CAR
 
-def create_steering_control(packer, car_fingerprint, frame, apply_steer, lkas, angle):
+def create_steering_control(packer, car_fingerprint, idx, apply_steer, lkas, angle):
 
   tmp = apply_steer + 2048
 
@@ -22,7 +22,7 @@ def create_steering_control(packer, car_fingerprint, frame, apply_steer, lkas, a
   amd =  (amd >> 4) | (( amd & 0xF) << 4)
   alo =  (tmp & 0x3) << 2
 
-  ctr = frame % 16
+  ctr = idx
   # bytes:     [    1  ] [ 2 ] [             3               ]  [           4         ]
   csum = 249 - ctr - hi - lo - (lnv << 3) - er1  - (ldw << 7) - ( er2 << 4) - (b1 << 5)
 
@@ -54,4 +54,4 @@ def create_steering_control(packer, car_fingerprint, frame, apply_steer, lkas, a
       "CHKSUM"           : csum
     }
 
-  return packer.make_can_msg("CAM_LKAS", 0, values)
+  return packer.make_can_msg("CAM_LKAS", 0, lkas)
